@@ -1,0 +1,51 @@
+name: Deploy HR Portal
+
+on:
+  push:
+    branches: [main]
+
+env:
+  IMAGE: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hr-app/portal
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Autenticar en GCP
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Configurar Docker
+        run: gcloud auth configure-docker us-central1-docker.pkg.dev --quiet
+
+      - name: Build imagen
+        run: docker build -t $IMAGE:${{ github.sha }} -t $IMAGE:latest .
+
+      - name: Push imagen
+        run: |
+          docker push $IMAGE:${{ github.sha }}
+          docker push $IMAGE:latest
+
+      - name: Deploy a Cloud Run
+        run: |
+          gcloud run deploy hr-portal \
+            --image $IMAGE:latest \
+            --region us-central1 \
+            --platform managed \
+            --allow-unauthenticated \
+            --port 8080 \
+            --memory 512Mi \
+            --min-instances 0 \
+            --max-instances 3 \
+            --add-cloudsql-instances ${{ secrets.GCP_PROJECT_ID }}:us-central1:hr-db \
+            --set-env-vars NODE_ENV=production \
+            --set-env-vars DB_NAME=hrdb \
+            --set-env-vars DB_USER=hruser \
+            --set-env-vars INSTANCE_CONNECTION_NAME=${{ secrets.GCP_PROJECT_ID }}:us-central1:hr-db \
+            --set-secrets DB_PASSWORD=hr-db-password:latest \
+            --set-secrets JWT_SECRET=hr-jwt-secret:latest
