@@ -388,6 +388,37 @@ let state = {
   // { "fixtureId_userId": { home: 2, away: 1, submitted: true } }
 };
 
+// ─── PERSISTENCE ────────────────────────────────────
+const STORAGE_KEY = "s2r_worldcup_2026";
+
+function saveState() {
+  try {
+    const toSave = {
+      users:           state.users,
+      fixtures:        state.fixtures,
+      announcements:   state.announcements,
+      userChallenges:  state.userChallenges,
+      matchPools:      state.matchPools,
+      eliminatedTeams: state.eliminatedTeams
+    };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch(e) { console.warn("saveState failed", e); }
+}
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const saved = JSON.parse(raw);
+    if (saved.users           && saved.users.length)           state.users           = saved.users;
+    if (saved.fixtures        && saved.fixtures.length)        state.fixtures        = saved.fixtures;
+    if (saved.announcements   && saved.announcements.length)   state.announcements   = saved.announcements;
+    if (saved.userChallenges)  state.userChallenges  = saved.userChallenges;
+    if (saved.matchPools)      state.matchPools      = saved.matchPools;
+    if (saved.eliminatedTeams) state.eliminatedTeams = saved.eliminatedTeams;
+  } catch(e) { console.warn("loadState failed", e); }
+}
+
 // ─── HELPERS ────────────────────────────────────────
 const getTeam     = id => TEAMS.find(t => t.id === id);
 const AVATAR_COLS = ["#6366f1","#8b5cf6","#06b6d4","#10b981","#f59e0b","#ef4444","#ec4899","#3b82f6"];
@@ -443,6 +474,14 @@ function navigate(p) {
 }
 
 function initApp() {
+  loadState();
+  // Restore session if not already set
+  if (!state.currentUser) {
+    const saved = localStorage.getItem("s2r_session");
+    if (saved && state.users.find(u => u.id === saved)) {
+      state.currentUser = saved;
+    }
+  }
   const me = getMe();
   const isAdmin = me.role === "admin";
   const navItems = isAdmin ? ["dashboard","leaderboard","pool","admin","profile"] : ["dashboard","leaderboard","pool","challenges","profile"];
@@ -600,6 +639,7 @@ function submitPoolPick(fixtureId) {
   const awayVal = parseInt(document.getElementById("pool-away").value) || 0;
   const key = getPoolKey(fixtureId, state.currentUser);
   state.matchPools[key] = { home: homeVal, away: awayVal, submitted: true };
+  saveState();
   closeModal("pool");
   renderPage();
   showNotif("🎱 Prediction locked! " + homeVal + " – " + awayVal);
@@ -608,6 +648,7 @@ function submitPoolPick(fixtureId) {
 function clearPoolPick(fixtureId) {
   const key = getPoolKey(fixtureId, state.currentUser);
   delete state.matchPools[key];
+  saveState();
   openPoolModal(fixtureId);
 }
 
@@ -626,6 +667,7 @@ function applyPoolPointsForFixture(fixtureId) {
     }
     return { ...u, points: Math.max(0, u.points + pts) };
   });
+  saveState();
 }
 
 function doLogin() {
@@ -636,6 +678,7 @@ function doLogin() {
   if (!user) { err.style.display = ""; err.textContent = "Invalid email or password"; return; }
   err.style.display = "none";
   state.currentUser = user.id;
+  localStorage.setItem("s2r_session", user.id);
   initApp(); showPage("app");
   showNotif(`Welcome back, ${user.name.split(" ")[0]}! ⚽`);
 }
@@ -652,12 +695,14 @@ function doRegister() {
               planBActive:false,planBActivated:false,points:0,underdogBonus:0,achievements:[],
               eliminated:false,joined:new Date().toISOString().slice(0,10)};
   state.users.push(nu);
+  saveState();
   state.currentUser = nu.id;
+  localStorage.setItem("s2r_session", nu.id);
   initApp(); showPage("app");
   showNotif("Account created! Pick your teams to start 🏆");
 }
 
-function doLogout() { state.currentUser = null; showPage("landing"); }
+function doLogout() { state.currentUser = null; localStorage.removeItem("s2r_session"); showPage("landing"); }
 
 // ─── NOTIFICATIONS & CONFETTI ───────────────────────
 function showNotif(msg, type = "success") {
@@ -1472,6 +1517,7 @@ function savePoints(id) {
   const pts   = parseInt(document.getElementById("pts-"  + id).value) || 0;
   const bonus = parseInt(document.getElementById("bonus-"+ id).value) || 0;
   state.users = state.users.map(u => u.id === id ? {...u, points: pts, underdogBonus: bonus} : u);
+  saveState();
   state.editingPoints = null; renderPage(); showNotif("Points updated! ✅");
 }
 
@@ -1479,6 +1525,7 @@ function postAnn() {
   const txt = document.getElementById("ann-input").value.trim();
   if (!txt) return;
   state.announcements.unshift({id:"a"+Date.now(), text:txt, time:"Just now", type:"admin"});
+  saveState();
   renderPage(); showNotif("Announcement posted! 📣");
 }
 
@@ -1492,6 +1539,7 @@ function createChallenge() {
     deadline: document.getElementById("ch-deadline").value,
     active: true
   });
+  saveState();
   renderPage(); showNotif("Challenge created! 🎯");
 }
 
@@ -1514,6 +1562,7 @@ function eliminateTeam() {
     return u;
   });
   state.announcements.unshift({id:"a"+Date.now(), text:"💀 "+t.flag+" "+t.name+" eliminated! Plan B groups activated for "+activatedCount+" player(s).", time:"Just now", type:"planb"});
+  saveState();
   renderPage();
   showConfetti(["#f59e0b","#ef4444","#fbbf24","#f97316"]);
   showNotif(t.flag+" "+t.name+" eliminated! "+activatedCount+" Plan B group(s) activated.","planb");
@@ -1522,6 +1571,7 @@ function eliminateTeam() {
 function uneliminate(tid) {
   state.eliminatedTeams = state.eliminatedTeams.filter(t => t !== tid);
   state.users = state.users.map(u => u.team === tid ? {...u, eliminated:false, planBActive:false, planBActivated:false} : u);
+  saveState();
   renderPage(); showNotif("Team reinstated");
 }
 
@@ -1557,6 +1607,7 @@ function pickTeam(id) {
   const taken = state.users.find(u => u.id !== state.currentUser && u.team === id);
   if (taken) { showNotif(getTeam(id).name+" is already taken!","error"); return; }
   state.users = state.users.map(u => u.id === state.currentUser ? {...u, team:id} : u);
+  saveState();
   closeModal("team"); updateHeader(); renderPage();
   showConfetti(); showNotif(getTeam(id).flag+" "+getTeam(id).name+" is your main team! Now pick a Plan B 🔄");
 }
@@ -1592,6 +1643,7 @@ function pickPlanB(groupLetter) {
   const taken = state.users.find(u => u.id !== state.currentUser && u.planBGroup === groupLetter);
   if (taken) { showNotif("Group "+groupLetter+" is already taken by "+taken.name.split(" ")[0]+"!","error"); return; }
   state.users = state.users.map(u => u.id === state.currentUser ? {...u, planBGroup:groupLetter} : u);
+  saveState();
   closeModal("planb"); updateHeader(); renderPage();
   showConfetti(["#f59e0b","#ef4444","#fbbf24","#f97316"]);
   const teams = getPlanBGroupTeams(groupLetter);
@@ -1625,6 +1677,7 @@ function submitChallenge(id) {
   let display = ans;
   if (id === "c1") { const t = getTeam(ans); if (t) display = t.flag + " " + t.name; }
   state.userChallenges[state.currentUser+"_"+id] = display;
+  saveState();
   closeModal("challenge"); renderPage(); showNotif("Challenge submitted! Points pending review 🎯");
 }
 
