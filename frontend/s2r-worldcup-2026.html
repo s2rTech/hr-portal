@@ -146,7 +146,6 @@ td{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.04);font-size:14p
             <input class="input-field" id="login-pass" placeholder="Password" type="password" onkeydown="if(event.key==='Enter')doLogin()">
             <div id="login-error" style="color:#ef4444;font-size:13px;font-weight:600;display:none"></div>
             <button class="btn-primary" style="margin-top:6px" onclick="doLogin()">Sign In</button>
-            <div style="text-align:center;font-size:12px;color:#6b7280;margin-top:4px">Admin: lucia@sell2rent.com · Admin123!</div>
           </div>
         </div>
         <!-- Register -->
@@ -377,8 +376,6 @@ let state = {
   ],
   challenges: [
     {id:"c1",title:"Predict the Champion",      description:"Who will win the World Cup 2026?",          points:15,deadline:"2026-06-20",active:true},
-    {id:"c2",title:"Top Scorer Pick",            description:"Who will be the tournament top scorer?",    points:10,deadline:"2026-06-22",active:true},
-    {id:"c3",title:"Best Plan B Group Pick",           description:"Whose Plan B group will produce the most points?",       points:12,deadline:"2026-06-19",active:true}
   ],
   announcements: [
     {id:"a1",text:"🏆 Welcome to the S2R World Cup 2026 — register and pick your team!",time:"Just now",type:"admin"},
@@ -448,7 +445,7 @@ function navigate(p) {
 function initApp() {
   const me = getMe();
   const isAdmin = me.role === "admin";
-  const navItems = isAdmin ? ["dashboard","leaderboard","fixtures","pool","admin","profile"] : ["dashboard","leaderboard","fixtures","pool","challenges","profile"];
+  const navItems = isAdmin ? ["dashboard","leaderboard","pool","admin","profile"] : ["dashboard","leaderboard","pool","challenges","profile"];
   const navLabels = {dashboard:"Dashboard",leaderboard:"Leaderboard",fixtures:"Fixtures",pool:"🎱 Pool",admin:"Admin",challenges:"Challenges",profile:"My Teams"};
   document.getElementById("main-nav").innerHTML = navItems.map(p =>
     `<button class="nav-btn${state.currentPage === p ? " active" : ""}" id="nav-${p}" onclick="navigate('${p}')">${navLabels[p]}</button>`
@@ -476,7 +473,6 @@ function renderPage() {
   switch (state.currentPage) {
     case "dashboard":   mc.innerHTML = renderDashboard();   break;
     case "leaderboard": mc.innerHTML = renderLeaderboard(); break;
-    case "fixtures":    mc.innerHTML = renderFixtures();    break;
     case "challenges":  mc.innerHTML = renderChallenges();  break;
     case "admin":       mc.innerHTML = renderAdmin();       break;
     case "profile":     mc.innerHTML = renderProfile();     break;
@@ -688,6 +684,96 @@ function showConfetti(colors) {
 }
 
 // ─── RENDER: DASHBOARD ──────────────────────────────
+
+// ─── RENDER: BRACKET ─────────────────────────────────
+function renderBracket(sorted) {
+  // Pad to 16 slots (power of 2 for nice bracket)
+  const slots = 16;
+  const players = [...sorted];
+  while (players.length < slots) players.push(null);
+  const ps = players.slice(0, slots);
+
+  function playerSlot(p, highlight) {
+    if (!p) return `<div style="display:flex;align-items:center;gap:7px;background:rgba(255,255,255,.02);border:1px dashed rgba(255,255,255,.08);border-radius:8px;padding:6px 10px;min-width:0">
+      <div style="width:26px;height:26px;border-radius:50%;background:rgba(255,255,255,.06);flex-shrink:0"></div>
+      <div style="font-size:11px;color:#374151;font-style:italic">TBD</div>
+    </div>`;
+    const at = getActiveTeam(p);
+    const isMe = p.id === state.currentUser;
+    const border = isMe ? "border-color:rgba(0,229,255,.5)" : at && at.isPlanB ? "border-color:rgba(245,158,11,.35)" : "";
+    return `<div style="display:flex;align-items:center;gap:7px;background:${isMe?"rgba(0,229,255,.07)":"rgba(255,255,255,.03)"};border:1px solid rgba(255,255,255,.1);${border};border-radius:8px;padding:6px 10px;min-width:0;transition:all .2s" title="${p.name}">
+      ${avatar(p.name, 24)}
+      <div style="flex:1;min-width:0">
+        <div style="font-size:11px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name.split(" ")[0]}${isMe?" <span style='color:#00e5ff'>(You)</span>":""}</div>
+        <div style="font-size:10px;color:#6b7280">${at ? at.flag+" "+at.name+(at.isPlanB?" 🔄":"") : "No team"}</div>
+      </div>
+      <div class="orb" style="font-size:10px;font-weight:900;color:#fbbf24;flex-shrink:0">${totalPts(p)}</div>
+    </div>`;
+  }
+
+  function matchup(p1, p2, roundLabel) {
+    return `<div style="display:flex;flex-direction:column;gap:3px">
+      ${playerSlot(p1)}
+      <div style="text-align:center;font-size:9px;color:#374151;font-weight:700;letter-spacing:.5px">${roundLabel||""}</div>
+      ${playerSlot(p2)}
+    </div>`;
+  }
+
+  // Round of 16: pairs (0v15,1v14,2v13,...,7v8) — seeded bracket style
+  const r16pairs = [[0,15],[1,14],[2,13],[3,12],[4,11],[5,10],[6,9],[7,8]];
+  const left  = r16pairs.slice(0,4); // top half left side
+  const right = r16pairs.slice(4,8); // top half right side
+
+  const bracketSide = (pairs, side) => pairs.map(([a,b]) =>
+    `<div>${matchup(ps[a], ps[b], "R16")}</div>`
+  ).join(`<div style="height:14px"></div>`);
+
+  return `
+  <div style="overflow-x:auto;padding-bottom:8px">
+  <div style="display:grid;grid-template-columns:1fr 90px 1fr;gap:12px;min-width:600px;align-items:center">
+
+    <!-- LEFT COLUMN: R16 matchups -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${left.map(([a,b]) => matchup(ps[a], ps[b], "")).join('<div style="height:8px"></div>')}
+    </div>
+
+    <!-- CENTER: Trophy + QF/SF labels -->
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px">
+      <div style="font-size:10px;font-weight:700;color:#6b7280;letter-spacing:.6px;text-transform:uppercase;margin-bottom:4px">QF</div>
+      <div style="flex:1;width:1px;background:linear-gradient(to bottom,rgba(255,255,255,.08),rgba(0,229,255,.25),rgba(255,255,255,.08));min-height:40px"></div>
+      <div style="font-size:10px;font-weight:700;color:#6b7280;letter-spacing:.6px;text-transform:uppercase">SF</div>
+      <div style="flex:1;width:1px;background:linear-gradient(to bottom,rgba(255,255,255,.08),rgba(0,229,255,.25),rgba(255,255,255,.08));min-height:40px"></div>
+
+      <!-- Trophy center -->
+      <div style="background:linear-gradient(135deg,rgba(251,191,36,.18),rgba(239,68,68,.12));border:1px solid rgba(251,191,36,.4);border-radius:14px;padding:12px 14px;text-align:center;box-shadow:0 0 24px rgba(251,191,36,.15)">
+        <div style="font-size:30px;margin-bottom:4px">🏆</div>
+        <div class="orb" style="font-size:9px;font-weight:900;color:#fbbf24;letter-spacing:.8px">CHAMPION</div>
+        <div style="font-size:9px;color:#6b7280;margin-top:3px">Top scorer wins!</div>
+      </div>
+
+      <div style="flex:1;width:1px;background:linear-gradient(to bottom,rgba(255,255,255,.08),rgba(245,158,11,.25),rgba(255,255,255,.08));min-height:40px"></div>
+      <div style="font-size:10px;font-weight:700;color:#6b7280;letter-spacing:.6px;text-transform:uppercase">SF</div>
+      <div style="flex:1;width:1px;background:linear-gradient(to bottom,rgba(255,255,255,.08),rgba(245,158,11,.25),rgba(255,255,255,.08));min-height:40px"></div>
+      <div style="font-size:10px;font-weight:700;color:#6b7280;letter-spacing:.6px;text-transform:uppercase;margin-top:4px">QF</div>
+    </div>
+
+    <!-- RIGHT COLUMN: R16 matchups (mirrored) -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+      ${right.map(([a,b]) => matchup(ps[a], ps[b], "")).join('<div style="height:8px"></div>')}
+    </div>
+
+  </div>
+
+  <!-- Legend -->
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:16px;padding-top:12px;border-top:1px solid rgba(255,255,255,.06)">
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7280"><div style="width:12px;height:12px;border-radius:3px;background:rgba(0,229,255,.07);border:1px solid rgba(0,229,255,.5)"></div> You</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7280"><div style="width:12px;height:12px;border-radius:3px;background:rgba(255,255,255,.03);border:1px solid rgba(245,158,11,.35)"></div> Plan B Active</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7280">🏆 = pts-based seeding</div>
+    <div style="display:flex;align-items:center;gap:5px;font-size:11px;color:#6b7280">Slots fill as players register</div>
+  </div>
+  </div>`;
+}
+
 function renderDashboard() {
   const me = getMe(); const sorted = getSorted(); const rank = getMyRank();
   const at = getActiveTeam(me);
@@ -747,15 +833,26 @@ function renderDashboard() {
     </div>
   </div>
 
+  <!-- BRACKET SECTION -->
+  <div class="card" style="margin-bottom:24px;padding:24px">
+    <div style="font-weight:700;font-size:15px;margin-bottom:6px">🏆 Tournament Bracket — Who Advances?</div>
+    <div style="font-size:12px;color:#6b7280;margin-bottom:20px">Players ranked by points · Each slot shows their active team</div>
+    ${renderBracket(sorted)}
+  </div>
+
   <div class="grid-2">
     <div class="card">
       <div style="font-weight:700;font-size:15px;margin-bottom:14px">📅 Upcoming Matches</div>
       ${upcoming.length === 0 ? "<div style='color:#6b7280'>No upcoming matches</div>" : upcoming.map(f => {
         const h = getTeam(f.home), a = getTeam(f.away);
-        return `<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-          <div style="font-size:13px;font-weight:600">${h.flag} ${h.name}</div>
-          <div style="background:rgba(255,255,255,.06);border-radius:5px;padding:3px 7px;font-size:11px;color:#9ca3af">vs</div>
-          <div style="font-size:13px;font-weight:600">${a.name} ${a.flag}</div>
+        const fmtDate = d => { const [,m,day] = d.split("-"); const months=["","Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]; return months[+m]+" "+parseInt(day); };
+        return `<div style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="font-size:10px;color:#6b7280;margin-bottom:5px;font-weight:600;letter-spacing:.5px">📅 ${fmtDate(f.date)} · Group ${f.group}</div>
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div style="font-size:13px;font-weight:600">${h.flag} ${h.name}</div>
+            <div style="background:rgba(255,255,255,.06);border-radius:5px;padding:3px 7px;font-size:11px;color:#9ca3af">vs</div>
+            <div style="font-size:13px;font-weight:600">${a.name} ${a.flag}</div>
+          </div>
         </div>`;
       }).join("")}
     </div>
@@ -1514,15 +1611,20 @@ function openChallengeModal(id) {
         <div style="font-size:24px;margin-bottom:6px">✅</div>
         <div style="color:#10b981;font-weight:700">Your answer: ${ans}</div>
       </div>` :
-      `<input class="input-field" id="ch-answer" placeholder="Your answer..." style="margin-bottom:13px">
-       <button class="btn-primary" style="width:100%" onclick="submitChallenge('${id}')">Submit Answer</button>`
+      (id === "c1"
+        ? `<select class="input-field" id="ch-answer" style="margin-bottom:13px"><option value="">— Select a team —</option>${TEAMS.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(t=>'<option value="'+t.id+'">'+t.flag+' '+t.name+'</option>').join('')}</select>`
+        : `<input class="input-field" id="ch-answer" placeholder="Your answer..." style="margin-bottom:13px">`) +
+      `<button class="btn-primary" style="width:100%" onclick="submitChallenge('${id}')">Submit Answer</button>`
     }`;
   document.getElementById("modal-challenge").classList.add("open");
 }
 
 function submitChallenge(id) {
-  const ans = document.getElementById("ch-answer").value.trim(); if (!ans) return;
-  state.userChallenges[state.currentUser+"_"+id] = ans;
+  const el = document.getElementById("ch-answer");
+  const ans = el.value.trim(); if (!ans) return;
+  let display = ans;
+  if (id === "c1") { const t = getTeam(ans); if (t) display = t.flag + " " + t.name; }
+  state.userChallenges[state.currentUser+"_"+id] = display;
   closeModal("challenge"); renderPage(); showNotif("Challenge submitted! Points pending review 🎯");
 }
 
