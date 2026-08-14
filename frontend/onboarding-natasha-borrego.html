@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Welcome to Sell2Rent — Miguel Villalobos</title>
+  <title>Welcome to Sell2Rent — Natasha Borrego</title>
   <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
   <style>
     :root {
@@ -154,6 +154,15 @@
     .footer-logo span { color: var(--green); }
 
     @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+
+    .transcript-box { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 12px; padding: 20px 22px; margin-top: 16px; }
+    .transcript-box summary { cursor: pointer; color: var(--green); font-weight: 700; font-size: 0.85rem; letter-spacing: 0.5px; text-transform: uppercase; }
+    .transcript-box p { color: #ccc; font-size: 0.85rem; line-height: 1.7; margin-top: 14px; }
+    .transcript-box p + p { margin-top: 12px; }
+    .transcript-note { color: var(--muted); font-size: 0.75rem; font-style: italic; margin-top: 12px; }
+
+    .walkthrough-shot { width: 100%; border-radius: 10px; border: 1px solid var(--border); margin-bottom: 8px; }
+    .walkthrough-caption { font-size: 0.78rem; color: var(--muted); text-align: center; margin-bottom: 20px; }
   </style>
 </head>
 <body>
@@ -171,11 +180,11 @@
 <div id="hero">
   <div class="hero-bg"></div>
   <div class="hero-grid"></div>
-  <div class="hero-greeting">🎉 Welcome to the Team, Miguel!</div>
+  <div class="hero-greeting">🎉 Welcome to the Team, Natasha!</div>
   <h1>Your Onboarding<br/><em>Begins Here</em></h1>
   <div class="hero-meta">
-    <span class="hero-tag">Seller Manager</span>
-    <span class="hero-tag">Start date: July 22, 2026</span>
+    <span class="hero-tag">Transaction Coordinator</span>
+    <span class="hero-tag">Start date: August 17, 2026</span>
   </div>
   <p>Everything you need for your first day at Sell2Rent — your credentials, tools, videos, and HR contact — all in one place.</p>
   <a href="#tools" class="btn-green">Let's start →</a>
@@ -198,7 +207,7 @@
         <div class="cred-box">
           <div class="cred-row">
             <span class="cred-label-t">Email</span>
-            <span class="cred-value">m.villalobos@sell2rent.com</span>
+            <span class="cred-value">n.borrego@sell2rent.com</span>
           </div>
           <div class="cred-row">
             <span class="cred-label-t">Login URL</span>
@@ -224,11 +233,11 @@
         <div class="cred-box">
           <div class="cred-row">
             <span class="cred-label-t">Username</span>
-            <span class="cred-value">m.villalobos@sell2rent.com</span>
+            <span class="cred-value">n.borrego@sell2rent.com</span>
           </div>
           <div class="cred-row">
             <span class="cred-label-t">Temporary Password</span>
-            <span class="cred-value">6XG!KCTD</span>
+            <span class="cred-value">^DJL2Wds</span>
           </div>
           <div class="cred-row">
             <span class="cred-label-t">Login URL</span>
@@ -256,6 +265,24 @@
         <a href="https://help.zoho.com/portal/en/kb/zoho-cliq/user-guides" target="_blank" class="tool-link">View Zoho Cliq Guide →</a>
       </div>
 
+      <div class="tool-card">
+        <div class="tool-num">04</div>
+        <h3>Dialpad</h3>
+        <p>Your outbound/inbound calling, SMS, and call recording tool for every seller conversation. Activate your account before Day 1.</p>
+        <div class="cred-box">
+          <div class="cred-row">
+            <span class="cred-label-t">Activation Link</span>
+            <span style="font-size:0.8rem;color:#aaa;">→ <a href="https://dialpad.com/start" target="_blank" style="color:var(--green);">dialpad.com/start</a></span>
+          </div>
+        </div>
+        <a href="https://dialpad.com/start" target="_blank" class="tool-link">Activate Dialpad →</a>
+      </div>
+
+      <div class="tool-card">
+        <div class="tool-num">05</div>
+        <h3>Moxo</h3>
+        <p>Used for client-facing document collection and e-signature workflows with sellers. You'll get an invite from Sales Ops — accept it and log in with your Sell2Rent email.</p>
+      </div>
     </div>
   </section>
 </div>
@@ -266,10 +293,10 @@
   <section>
     <div class="section-label">Step 2 — Onboarding Videos</div>
     <h2 class="section-title">Your Video Guide</h2>
-    <p class="section-sub">Watch all 6 videos in order to get familiar with Sell2Rent, your role, and how we work.</p>
+    <p class="section-sub">Watch all 5 videos in order to get familiar with Sell2Rent, your role, and how we work.</p>
     <div class="videos-grid">
       <div class="video-card">
-        <div class="video-thumb" onclick="openVideo('https://drive.google.com/file/d/1jJQTKD8-zW8Gc1C4OVI48mASjwbFeLFQ/view?usp=drive_link')">
+        <div class="video-thumb" onclick="openVideo('https://drive.google.com/file/d/1xsW9jEQohRfqX7FT-erPrGt3de9NYaSr/view?usp=drive_link')">
           <div class="video-thumb-gradient"></div>
           <div class="play-btn">
             <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="#000"/></svg>
@@ -279,10 +306,9 @@
           <div class="video-num">Video 01</div>
           <h4>Welcome to Sell2Rent</h4>
           <p>Kickstart your journey with an intro to who we are, how we work, and what to expect as part of the team.</p>
-          <a href="https://drive.google.com/file/d/1jJQTKD8-zW8Gc1C4OVI48mASjwbFeLFQ/view?usp=drive_link" target="_blank" class="tool-link">Watch Video →</a>
+          <a href="https://drive.google.com/file/d/1xsW9jEQohRfqX7FT-erPrGt3de9NYaSr/view?usp=drive_link" target="_blank" class="tool-link">Watch Video →</a>
         </div>
       </div>
-    
       <div class="video-card">
         <div class="video-thumb" onclick="openVideo('https://drive.google.com/file/d/1Z0GWFsWys__K086GGmy41xDEvVq0lFEf/view?usp=drive_link')">
           <div class="video-thumb-gradient"></div>
@@ -297,37 +323,25 @@
           <a href="https://drive.google.com/file/d/1Z0GWFsWys__K086GGmy41xDEvVq0lFEf/view?usp=drive_link" target="_blank" class="tool-link">Watch Video →</a>
         </div>
       </div>
-    
-      <div class="video-card">
-        <div class="video-thumb" onclick="openVideo('https://drive.google.com/file/d/1rihfeEH02zuDXAgo-R4G2GW52mepyYh7/view?usp=drive_link')">
-          <div class="video-thumb-gradient"></div>
-          <div class="play-btn">
-            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="#000"/></svg>
-          </div>
-        </div>
-        <div class="video-info">
-          <div class="video-num">Video 03</div>
-          <h4>General Overview</h4>
-          <p>A quick look at Sell2Rent's mission, operations, and how each department contributes to our workflow.</p>
-          <a href="https://drive.google.com/file/d/1rihfeEH02zuDXAgo-R4G2GW52mepyYh7/view?usp=drive_link" target="_blank" class="tool-link">Watch Video →</a>
-        </div>
-      </div>
-    
-      <div class="video-card">
-        <div class="video-thumb" onclick="openVideo('https://drive.google.com/file/d/1UXgl0aDLHCsGzNJO5YdYbceE2-oIjl7N/view?usp=drive_link')">
-          <div class="video-thumb-gradient"></div>
-          <div class="play-btn">
-            <svg viewBox="0 0 24 24"><polygon points="5,3 19,12 5,21" fill="#000"/></svg>
-          </div>
-        </div>
-        <div class="video-info">
-          <div class="video-num">Video 04</div>
-          <h4>Seller Advisor Role</h4>
-          <p>Daily responsibilities, core processes, and how this role guides homeowners through their journey.</p>
-          <a href="https://drive.google.com/file/d/1UXgl0aDLHCsGzNJO5YdYbceE2-oIjl7N/view?usp=drive_link" target="_blank" class="tool-link">Watch Video →</a>
+      <div class="video-card" style="grid-column: 1 / -1;">
+        <div style="padding:22px 22px 6px;">
+          <div class="video-num">Video 03 — Transaction Coordinator Role</div>
+          <h4>Your Role, and a Welcome to the Deal Side</h4>
+          <p>Daily responsibilities, the core documents you'll master, and how this role owns a deal from Contract Assigned through Close — plus a mission briefing (~2 min).</p>
+          <a href="https://drive.google.com/file/d/1T_V1WVkXQA1T9ksicr7eOPfopAmzi7lH/view?usp=drive_link" target="_blank" class="tool-link">Watch Video →</a>
+          <details class="transcript-box">
+            <summary>Read the transcript</summary>
+            <p>Welcome to the team! You're joining Sell2Rent as a Transaction Coordinator on the deal side, and we're glad to have you.</p>
+            <p>Your job starts the moment a deal moves from search to Contract Assigned — and it's yours the rest of the way through Close, including the post-closing reconciliation. Everything before that, finding and closing the investor, belongs to the Investor Advisors. Once that handoff happens, you own it.</p>
+            <p>You'll become the expert on the core documents you'll touch on every deal: the Purchase &amp; Sale Agreement, addendums, the Assignment of Contract, the NOC, and any other legal documents Company counsel flags as required. Know them cold.</p>
+            <p>Your mentality here is simple: play offense. Don't wait for something to go wrong — check in with the title company, the lender, and the investor before they have to chase you. Constantly ask yourself: what's going to speed this deal up, and what's going to delay it?</p>
+            <p>You're also building something bigger than any single deal: our network of preferred title companies and closing partners. Every time we land in a new market, you're the one researching and vetting who we work with there, so the next deal in that state is instant.</p>
+            <p>We measure this role three ways: net revenue to Sell2Rent, how many deals you close a month, and whether you're closing ahead of or behind the date we promised the investor. We won't win every one — some delays are outside anyone's control — but the goal is always to push the timeline forward, not just manage it.</p>
+            <p>Welcome aboard. Bring your attention to detail and your urgency. Let's get transactions closed, and closed right.</p>
+            <div class="transcript-note">Transcript lightly cleaned up for readability.</div>
+          </details>
         </div>
       </div>
-    
       <div class="video-card">
         <div class="video-thumb" onclick="openVideo('https://drive.google.com/file/d/1hsS0KBD5OmZzp01lr5MfoLkxk_dtOepT/view?usp=drive_link')">
           <div class="video-thumb-gradient"></div>
@@ -336,13 +350,12 @@
           </div>
         </div>
         <div class="video-info">
-          <div class="video-num">Video 05</div>
+          <div class="video-num">Video 04</div>
           <h4>Investor Advisor Role</h4>
           <p>How this role supports investors, manages inquiries, and nurtures partnerships in the investment pipeline.</p>
           <a href="https://drive.google.com/file/d/1hsS0KBD5OmZzp01lr5MfoLkxk_dtOepT/view?usp=drive_link" target="_blank" class="tool-link">Watch Video →</a>
         </div>
       </div>
-    
       <div class="video-card">
         <div class="video-thumb" onclick="openVideo('https://drive.google.com/file/d/1QX7SndyEhFKecr1k196Zmtvx44XmylwR/view?usp=drive_link')">
           <div class="video-thumb-gradient"></div>
@@ -351,13 +364,12 @@
           </div>
         </div>
         <div class="video-info">
-          <div class="video-num">Video 06</div>
+          <div class="video-num">Video 05</div>
           <h4>Remote Work Best Practices</h4>
           <p>Key tips and guidelines to stay productive, connected, and aligned while working remotely.</p>
           <a href="https://drive.google.com/file/d/1QX7SndyEhFKecr1k196Zmtvx44XmylwR/view?usp=drive_link" target="_blank" class="tool-link">Watch Video →</a>
         </div>
-      </div>
-    </div>
+      </div></div>
   </section>
 </div>
 
@@ -405,7 +417,7 @@
 
 <footer>
   <div class="footer-logo">Sell<span>2</span>Rent<sup style="font-size:0.35em;color:#555">®</sup></div>
-  <p>Welcome aboard, Miguel — we're thrilled to have you on the team.</p>
+  <p>Welcome aboard, Natasha — we're thrilled to have you on the team.</p>
 </footer>
 
 <script>
